@@ -4,6 +4,8 @@ import com.ninjaone.dundie_awards.model.Employee;
 import com.ninjaone.dundie_awards.model.Organization;
 import com.ninjaone.dundie_awards.repository.EmployeeRepository;
 import com.ninjaone.dundie_awards.repository.OrganizationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,9 @@ import java.util.Objects;
 
 @Component
 public class DataLoader implements CommandLineRunner {
+
+
+    private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
 
     private final EmployeeRepository employeeRepository;
     private final OrganizationRepository organizationRepository;
@@ -49,5 +54,6 @@ public class DataLoader implements CommandLineRunner {
                 .mapToInt(employee -> Objects.requireNonNullElse(employee.getDundieAwards(), 0))
                 .sum();
         this.awardsCache.setTotalAwards(totalAwards);
+        log.info("CommandLineRunner completed");
     }
 }

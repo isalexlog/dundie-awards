@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,15 +49,18 @@ class IndexControllerTest {
         employee.setOrganization(organization);
         employees.add(employee);
 
-        List<Activity> activities = new ArrayList<>();
+        BlockingQueue<Activity> messages = new LinkedBlockingQueue<>();
         var activity = new Activity();
+        messages.add(activity);
+
+        List<Activity> activities = new ArrayList<>();
         activities.add(activity);
 
         int totalDundieAwards = 5;
 
         when(employeeRepository.findAll()).thenReturn(employees);
         when(activityRepository.findAll()).thenReturn(activities);
-        when(messageBroker.getMessages()).thenReturn(activities);
+        when(messageBroker.getMessages()).thenReturn(messages);
         when(awardsCache.getTotalAwards()).thenReturn(totalDundieAwards);
 
         mockMvc.perform(get("/"))
@@ -63,7 +68,7 @@ class IndexControllerTest {
                 .andExpect(view().name("index"))
                 .andExpect(model().attribute("employees", employees))
                 .andExpect(model().attribute("activities", activities))
-                .andExpect(model().attribute("queueMessages", activities))
+                .andExpect(model().attribute("queueMessages", messages))
                 .andExpect(model().attribute("totalDundieAwards", totalDundieAwards));
 
         verify(employeeRepository, atLeastOnce()).findAll();
